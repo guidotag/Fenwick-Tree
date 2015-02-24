@@ -79,7 +79,7 @@ class RangeFenwickTree{
 };
 
 template<typename T>
-RangeFenwickTree<T>::RangeFenwickTree(int n) : mul(n), add(n){	/* 0 = neutral element */
+RangeFenwickTree<T>::RangeFenwickTree(int n) : mul(n), add(n){
 	assert(n > 0);
 	this->n = n;
 }
