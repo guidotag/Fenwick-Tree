@@ -1,17 +1,17 @@
 /**
  * Fenwick Tree (or Binary Indexed Tree).
- * Allows operations with prefix sums of an array A[0..n], namely:
+ * Allows operations with prefix sums of an array A[1..n], namely:
  * 	1. Reading the cumulative sum for an index. In other words, given
- * 		0 <= i <= n, return A[0] + ... + A[i].
+ * 		1 <= i <= n, return A[1] + ... + A[i].
  * 	2. Updating position A[i], and consequently all the cumulative
  * 		sums.
  * 	3. Reading A[i].
  * 	4. Finding an index where a cumulative frequency lies. That is,
- * 		given s, find 0 <= i <= n such that A[0] + ... + A[i] = s.
+ * 		given s, find 1 <= i <= n such that A[1] + ... + A[i] = s.
  * 	5. Scaling the entire array A by a constant factor.
  * 
  * Operations 1, 2, 3 and 4 are done in O(log n), and 5 in O(n).
- * The structure uses only an internal array of n elements, so it is
+ * The structure uses only an internal array of n + 1 elements, so it is
  * fast but also compact.
  * Note that there is no need to explicitly store array A: we
  * can use this data structure to talk about A's cumulative sums
@@ -33,6 +33,14 @@
 #include <cassert>
 
 using namespace std;
+
+/**
+ * T must have a default constructor that initializes the object
+ * as the neutral element. It must implement the operator + such
+ * that (T, +) is a group. Also, it must implement the operator
+ * - in the natural way. Finally, it must implement a copy
+ * constructor.
+ */
 
 template<typename T>
 class FenwickTree{
@@ -61,11 +69,11 @@ class FenwickTree{
 		void scale(int c);
 		
 		/**
-		 * Returns the greatest index i such that A[0] + ... + A[i] <= cumu.
+		 * Returns the greatest index i such that A[1] + ... + A[i] <= cumu.
 		 * Assumes all values A[j] are nonnegative (equivalently, the cumulative 
 		 * sums are non-decreasing).
 		 * 
-		 * Precondition: A[0] <= cumu 
+		 * Precondition: A[1] <= cumu 
 		 */
 		int getIndex(T cumu);
 		
@@ -76,37 +84,33 @@ class FenwickTree{
 		int msb(int x);
 	
 		vector<T> tree;
-		int size;
+		int n;
 };
 
 template<typename T>
-FenwickTree<T>::FenwickTree(int n) : tree(n, 0), size(n){	/* 0 = neutral element */
+FenwickTree<T>::FenwickTree(int n) : tree(n + 1){
 	assert(n > 0);
+	this->n = n;
 }
 
 template<typename T>
 void FenwickTree<T>::update(int idx, T val){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
-	if(idx == 0){
-		tree[0] += val;				/* + = operation */
-		return;
-	}
-	
-	while(idx <= size){
-		tree[idx] += val;			/* + = operation */
+	while(idx <= n){
+		tree[idx] += val;
 		idx += (idx & -idx);
 	}
 }
 
 template<typename T>
 T FenwickTree<T>::query(int idx){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
-	T sum(tree[0]);
+	T sum = T();
 	
-	while(idx > 0){
-		sum += tree[idx];				/* + = operation */
+	while(idx >= 1){
+		sum += tree[idx];
 		idx -= (idx & -idx);
 	}
 	
@@ -115,14 +119,14 @@ T FenwickTree<T>::query(int idx){
 
 template<typename T>
 T FenwickTree<T>::readSingle(int idx){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
-	T join(idx - (idx & -idx));
+	int join = idx - (idx & -idx);
 	T res(tree[idx]);
 	idx--;
 	
 	while(idx > join){
-		res -= tree[idx];				/* - = inverse operation */
+		res -= tree[idx];
 		idx -= (idx & -idx);
 	}
 	
@@ -131,7 +135,7 @@ T FenwickTree<T>::readSingle(int idx){
 
 template<typename T>
 void FenwickTree<T>::scale(int c){
-	for(int i = 1; i <= size; i++){
+	for(int i = 1; i <= n; i++){
 		tree[i] *= 1 / c;
 	}
 }
@@ -151,20 +155,15 @@ int FenwickTree<T>::msb(int x){
 
 template<typename T>
 int FenwickTree<T>::getIndex(T cumu){
-	assert(cumu >= tree[0]);
-
-	if(size == 1){
-		return 0;
-	}
+	assert(cumu >= tree[1]);
 	
-	int mask = msb(size - 1);
+	int mask = msb(n);
 	int base = 0;
-	
-	cumu -= tree[0];					/* - = inverse operation */
+
 	while(mask > 0){
 		int mid = base + mask;
-		if(mid < size && tree[mid] <= cumu){
-			cumu -= tree[mid];			/* - = inverse operation */
+		if(mid <= n && tree[mid] <= cumu){
+			cumu -= tree[mid];
 			base = mid;
 		}
 		mask = mask >> 1;
@@ -176,17 +175,17 @@ int FenwickTree<T>::getIndex(T cumu){
 template<typename T>
 ostream &operator<<(ostream &out, FenwickTree<T> &ft){
 	out << "Internal array:\t\t";
-	for(int i = 0; i < ft.size; i++){
+	for(int i = 1; i <= ft.n; i++){
 		out << ft.tree[i] << " ";
 	}
 	out << endl;
 	out << "Cumulative sums:\t";
-	for(int i = 0; i < ft.size; i++){
+	for(int i = 1; i <= ft.n; i++){
 		out << ft.query(i) << " ";
 	}
 	out << endl;
 	out << "Values:\t\t\t";
-	for(int i = 0; i < ft.size; i++){
+	for(int i = 1; i <= ft.n; i++){
 		out << ft.readSingle(i) << " ";
 	}
 	out << endl;

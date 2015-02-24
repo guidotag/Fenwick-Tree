@@ -1,6 +1,6 @@
 /**
- * Fenwick Tree supporting a range-update operation in log time. Let A[0..n] be the
- * underlying array we are updating, and let S(i) = A[0] + ... + A[i].
+ * Fenwick Tree supporting a range-update operation in log time. Let A[1..n] be the
+ * underlying array we are updating, and let S(i) = A[1] + ... + A[i].
  * Suppose we want to update A, adding a constant x to each element
  * between indices l and r (l <= r). To update the cumulative sum
  * S(i) (l <= i <= r) we assign
@@ -8,12 +8,12 @@
  * S(i) = S(i) + (i - l + 1) * x
  * 		= S(i) + x * i - x * (l - 1)
  * 
- * If 0 <= i < l then S(i) remains the same, and if r < i <= n we'll
+ * If 1 <= i < l then S(i) remains the same, and if r < i <= n we'll
  * have to add (r - l + 1) * x.
  * 
  * Note that letting f(i) = x * i - x * (l - 1) we can think of this process
  * as adding linear functions on i. Suppose we have two arrays
- * mul[0..n] and add[0..n] such that S(i) = mul[i] * i + add[i]. Initially
+ * mul[1..n] and add[1..n] such that S(i) = mul[i] * i + add[i]. Initially
  * mul[i] = add[i] = 0 for all i. Then, each time we update S(i)
  * we'll have
  * 
@@ -25,7 +25,7 @@
  * mul[i] += x
  * add[i] -= x * (l - 1)
  * 
- * S(i) will be updated. For 0 <= i < l we don't need to 
+ * S(i) will be updated. For 1 <= i < l we don't need to 
  * modify mul and add, and finally for r < i <= n we just need to assign
  * add[i] += (r - l + 1) * x.
  * 
@@ -75,24 +75,25 @@ class RangeFenwickTree{
 	private:
 		FenwickTree<T> mul;
 		FenwickTree<T> add;
-		int size;
+		int n;
 };
 
 template<typename T>
-RangeFenwickTree<T>::RangeFenwickTree(int n) : mul(n), add(n), size(n){	/* 0 = neutral element */
+RangeFenwickTree<T>::RangeFenwickTree(int n) : mul(n), add(n){	/* 0 = neutral element */
 	assert(n > 0);
+	this->n = n;
 }
 
 template<typename T>
 void RangeFenwickTree<T>::update(int idx, T val){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
 	update(idx, idx, val);
 }
 
 template<typename T>
 void RangeFenwickTree<T>::update(int from, int to, T val){
-	assert(from >= 0 && from <= to && to < size);
+	assert(from >= 1 && from <= to && to <= n);
 	
 	mul.update(from, val);
 	add.update(from, -(from - 1) * val);
@@ -102,17 +103,17 @@ void RangeFenwickTree<T>::update(int from, int to, T val){
 
 template<typename T>
 T RangeFenwickTree<T>::query(int idx){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
 	return mul.query(idx) * idx + add.query(idx);
 }
 
 template<typename T>
 T RangeFenwickTree<T>::readSingle(int idx){
-	assert(idx >= 0 && idx < size);
+	assert(idx >= 1 && idx <= n);
 	
-	if(idx == 0){
-		return query(0);
+	if(idx == 1){
+		return query(1);
 	}
 	
 	return query(idx) - query(idx - 1);
@@ -121,22 +122,22 @@ T RangeFenwickTree<T>::readSingle(int idx){
 template<typename T>
 ostream &operator<<(ostream &out, RangeFenwickTree<T> &rft){
 	out << "Mul array:\t\t";
-	for(int i = 0; i < rft.size; i++){
+	for(int i = 1; i <= rft.n; i++){
 		out << rft.mul.query(i) << " ";
 	}
 	out << endl;
 	out << "Add array:\t\t";
-	for(int i = 0; i < rft.size; i++){
+	for(int i = 1; i <= rft.n; i++){
 		out << rft.add.query(i) << " ";
 	}
 	out << endl;
 	out << "Cumulative sums:\t";
-	for(int i = 0; i < rft.size; i++){
+	for(int i = 1; i <= rft.n; i++){
 		out << rft.query(i) << " ";
 	}
 	out << endl;
 	out << "Values:\t\t\t";
-	for(int i = 0; i < rft.size; i++){
+	for(int i = 1; i <= rft.n; i++){
 		out << rft.readSingle(i) << " ";
 	}
 	out << endl;
