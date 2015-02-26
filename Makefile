@@ -1,19 +1,15 @@
-GXX = g++
-GXXFLAGS = -O2 -Wall -std=c++0x -pedantic
+CXX = g++
+CXXFLAGS = -O2 -Wall -std=c++0x -pedantic
 
-BIN = FenwickTree
-OBJS = main.o
+.PHONY: clean
 
-.PHONY: all clean
-
-all: $(BIN)
-	
-$(BIN): $(OBJS)
-	$(GXX) $(OBJS) -o $(BIN)
+FenwickTree: main.o
+	$(CXX) $< -o $@
 
 main.o: main.cpp FenwickTree.hpp RangeFenwickTree.hpp
-	$(GXX) -c $(GXXFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 	
 clean:
-	rm -f $(BIN) $(OBJS)
+	rm -f FenwickTree
+	rm -f main.o
 
