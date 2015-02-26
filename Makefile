@@ -7,7 +7,7 @@ FenwickTree: main.o
 	$(CXX) $< -o $@
 
 main.o: main.cpp FenwickTree.hpp RangeFenwickTree.hpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $<
 	
 clean:
 	rm -f FenwickTree
